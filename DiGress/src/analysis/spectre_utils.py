@@ -3,7 +3,7 @@
 # Adapted from https://github.com/lrjconan/GRAN/ which in turn is adapted from https://github.com/JiaxuanYou/graph-generation
 #
 ###############################################################################
-import graph_tool.all as gt
+# import graph_tool.all as gt
 ##Navigate to the ./util/orca directory and compile orca.cpp
 # g++ -O2 -std=c++11 -o orca orca.cpp
 import os

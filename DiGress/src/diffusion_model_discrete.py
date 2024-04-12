@@ -99,7 +99,6 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
         self.number_chain_steps = cfg.general.number_chain_steps
         self.best_val_nll = 1e8
         self.val_counter = 0
-        print("Difussion model initialization finished!")
 
     def training_step(self, data, i):
         if data.edge_index.numel() == 0:
@@ -109,10 +108,7 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
         dense_data = dense_data.mask(node_mask)
         X, E = dense_data.X, dense_data.E
         noisy_data = self.apply_noise(X, E, data.y, node_mask)
-        print("E size: ", E.size())
-        print("X size: ", X.size())
         extra_data = self.compute_extra_data(noisy_data)
-        print("extrad_data size: ", extra_data.size())
         pred = self.forward(noisy_data, extra_data, node_mask)
         loss = self.train_loss(masked_pred_X=pred.X, masked_pred_E=pred.E, pred_y=pred.y,
                                true_X=X, true_E=E, true_y=data.y,
@@ -224,8 +220,8 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
         self.test_E_kl.reset()
         self.test_X_logp.reset()
         self.test_E_logp.reset()
-        # if self.local_rank == 0:
-        #     utils.setup_wandb(self.cfg)
+        if self.local_rank == 0:
+            utils.setup_wandb(self.cfg)
 
     def test_step(self, data, i):
         dense_data, node_mask = utils.to_dense(data.x, data.edge_index, data.edge_attr, data.batch)
@@ -407,7 +403,7 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
 
     def apply_noise(self, X, E, y, node_mask):
         """ Sample noise and apply it to the data. """
-        print("Here in the noising function.")
+
         # Sample a timestep t.
         # When evaluating, the loss for t=0 is computed separately
         lowest_t = 0 if self.training else 1
@@ -427,8 +423,6 @@ class DiscreteDenoisingDiffusion(pl.LightningModule):
         assert (abs(Qtb.E.sum(dim=2) - 1.) < 1e-4).all()
 
         # Compute transition probabilities
-        print("QT X size: ", Qtb.X.size())
-        print("QT E size: ", Qtb.E.size())
         probX = X @ Qtb.X  # (bs, n, dx_out)
         probE = E @ Qtb.E.unsqueeze(1)  # (bs, n, n, de_out)
 

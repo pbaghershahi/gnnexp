@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.append("..")
+
 # import graph_tool as gt
 import os
 import pathlib
@@ -11,7 +15,7 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.utilities.warnings import PossibleUserWarning
 
-import utils
+from src import utils
 from metrics.abstract_metrics import TrainAbstractMetricsDiscrete, TrainAbstractMetrics
 
 from diffusion_model import LiftedDenoisingDiffusion
@@ -100,7 +104,6 @@ def main(cfg: DictConfig):
                         'extra_features': extra_features, 'domain_features': domain_features}
 
     elif dataset_config["name"] in ['qm9', 'guacamol', 'moses']:
-        print("1"*50, "QM9 dataset loaded!")
         from metrics.molecular_metrics import TrainMolecularMetrics, SamplingMolecularMetrics
         from metrics.molecular_metrics_discrete import TrainMolecularMetricsDiscrete
         from diffusion.extra_features_molecular import ExtraMolecularFeatures
@@ -112,8 +115,6 @@ def main(cfg: DictConfig):
             dataset_infos = qm9_dataset.QM9infos(datamodule=datamodule, cfg=cfg)
             train_smiles = qm9_dataset.get_train_smiles(cfg=cfg, train_dataloader=datamodule.train_dataloader(),
                                                         dataset_infos=dataset_infos, evaluate_dataset=False)
-            print("2"*50, "QM9 dataset loaded!")
-            
         elif dataset_config['name'] == 'guacamol':
             from datasets import guacamol_dataset
             datamodule = guacamol_dataset.GuacamolDataModule(cfg)
